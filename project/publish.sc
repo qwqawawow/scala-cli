@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
 lazy val (ghOrg, ghName) = {
-  def default = ("VirtusLab", "scala-cli")
+  def default = ("qwqawawow", "scala-cli")
   val isCI    = System.getenv("CI") != null
   if (isCI) {
     val repos = {

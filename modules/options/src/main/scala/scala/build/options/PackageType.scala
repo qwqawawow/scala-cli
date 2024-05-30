@@ -38,17 +38,9 @@ object PackageType {
       override def runnable = Some(false)
     }
   }
-  case object Docker extends PackageType {
-    override def runnable = None
-  }
   case object GraalVMNativeImage extends PackageType {
     override def runnable = Some(true)
   }
-  case object Debian extends NativePackagerType
-  case object Dmg    extends NativePackagerType
-  case object Pkg    extends NativePackagerType
-  case object Rpm    extends NativePackagerType
-  case object Msi    extends NativePackagerType
 
   val mapping = Seq(
     "assembly"     -> Assembly(true, None),
@@ -60,13 +52,7 @@ object PackageType {
     "spark"        -> Spark,
     "js"           -> Js,
     "native"       -> Native.Application,
-    "docker"       -> Docker,
     "graalvm"      -> GraalVMNativeImage,
-    "deb"          -> Debian,
-    "dmg"          -> Dmg,
-    "pkg"          -> Pkg,
-    "rpm"          -> Rpm,
-    "msi"          -> Msi
   )
   private lazy val map = mapping.toMap
   def parse(input: String): Option[PackageType] =

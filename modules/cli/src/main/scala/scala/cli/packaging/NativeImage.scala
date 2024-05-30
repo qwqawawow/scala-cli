@@ -4,6 +4,7 @@ import java.io.File
 
 import scala.annotation.tailrec
 import scala.build.internal.{ManifestJar, Runner}
+//HERE GOT THE JVM
 import scala.build.{Build, Logger, Positioned}
 import scala.cli.errors.GraalVMNativeImageError
 import scala.cli.graal.{BytecodeProcessor, TempCache}
@@ -176,7 +177,7 @@ object NativeImage {
 
     os.makeDir.all(nativeImageWorkDir)
 
-    val jvmId = build.options.notForBloopOptions.packageOptions.nativeImageOptions.jvmId
+    val jvmId = "system"
     val options = build.options.copy(
       javaOptions = build.options.javaOptions.copy(
         jvmIdOpt = Some(Positioned.none(jvmId))
@@ -242,7 +243,7 @@ object NativeImage {
 
           maybeWithShorterGraalvmHome(javaHome.javaHome, logger) { graalVMHome =>
 
-            val nativeImageCommand = ensureHasNativeImageCommand(graalVMHome, logger)
+            val nativeImageCommand = "native-image"
             val command            = nativeImageCommand.toString +: args
 
             val exitCode =

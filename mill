@@ -65,8 +65,6 @@ if [[ `uname | grep -E 'CYG*|MSYS*|MING*|UCRT*|ClANG*|GIT*'` ]]; then
   IFS=$'\n'
   eval "$(to_bash_syntax `"$cs" java --env --jvm temurin:17` || to_bash_syntax `"$cs" java --env --jvm openjdk:1.17.0`)"
   unset IFS
-else
-  eval "$("$cs" java --env --jvm temurin:17 || "$cs" java --env --jvm openjdk:1.17.0)"
 fi
 
 # temporary, until we pass JPMS options to native-image,
