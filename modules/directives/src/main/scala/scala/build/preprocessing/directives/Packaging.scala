@@ -21,17 +21,12 @@ import scala.cli.commands.SpecificationLevel
 @DirectiveExamples("//> using packaging.packageType assembly")
 @DirectiveExamples("//> using packaging.output foo")
 @DirectiveExamples("//> using packaging.provided org.apache.spark::spark-sql")
-@DirectiveExamples("//> using packaging.dockerFrom openjdk:11")
 @DirectiveExamples("//> using packaging.graalvmArgs --no-fallback")
 @DirectiveUsage(
   """using packaging.packageType [package type]
     |using packaging.output [destination path]
     |using packaging.provided [module]
     |using packaging.graalvmArgs [args]
-    |using packaging.dockerFrom [base docker image]
-    |using packaging.dockerImageTag [image tag]
-    |using packaging.dockerImageRegistry [image registry]
-    |using packaging.dockerImageRepository [image repository]
     |""".stripMargin,
   """`//> using packaging.packageType` _package-type_
     |
@@ -47,11 +42,6 @@ final case class Packaging(
   output: Option[String] = None,
   provided: List[Positioned[String]] = Nil,
   graalvmArgs: List[Positioned[String]] = Nil,
-  dockerFrom: Option[String] = None,
-  dockerImageTag: Option[String] = None,
-  dockerImageRegistry: Option[String] = None,
-  dockerImageRepository: Option[String] = None,
-  dockerCmd: Option[String] = None
 ) extends HasBuildOptions {
   // format: on
   def buildOptions: Either[BuildException, BuildOptions] = either {
@@ -101,13 +91,6 @@ final case class Packaging(
           packageTypeOpt = packageTypeOpt,
           output = output0.map(_.toString),
           provided = provided0,
-          dockerOptions = DockerOptions(
-            from = dockerFrom,
-            imageRegistry = dockerImageRegistry,
-            imageRepository = dockerImageRepository,
-            imageTag = dockerImageTag,
-            cmd = dockerCmd
-          ),
           nativeImageOptions = NativeImageOptions(
             graalvmArgs = graalvmArgs
           )

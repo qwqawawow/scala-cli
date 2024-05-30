@@ -1,7 +1,7 @@
 import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
 import $ivy.`io.get-coursier::coursier-launcher:2.1.10`
 import $ivy.`io.github.alexarchambault.mill::mill-native-image-upload:0.1.25`
-import $file.project.deps, deps.{Deps, Docker, InternalDeps, Scala, TestDeps}
+import $file.project.deps, deps.{Deps, InternalDeps, Scala, TestDeps}
 import $file.project.publish, publish.{ghOrg, ghName, ScalaCliPublishModule, organization}
 import $file.project.settings, settings.{
   CliLaunchers,
@@ -936,7 +936,6 @@ trait CliIntegration extends SbtModule with ScalaCliPublishModule with HasTests
       Deps.bsp4j,
       Deps.coursier
         .exclude(("com.github.plokhotnyuk.jsoniter-scala", "jsoniter-scala-macros")),
-      Deps.dockerClient,
       Deps.jsoniterCore,
       Deps.libsodiumjni,
       Deps.pprint,
@@ -991,13 +990,6 @@ trait CliIntegration extends SbtModule with ScalaCliPublishModule with HasTests
            |  def bloopVersion               = "${Deps.bloopRifle.dep.version}"
            |  def pprintVersion              = "${TestDeps.pprint.dep.version}"
            |  def munitVersion               = "${TestDeps.munit.dep.version}"
-           |  def dockerTestImage            = "${Docker.testImage}"
-           |  def dockerAlpineTestImage      = "${Docker.alpineTestImage}"
-           |  def authProxyTestImage         = "${Docker.authProxyTestImage}"
-           |  def mostlyStaticDockerfile     = "${mostlyStaticDockerfile.toString.replace(
-            "\\",
-            "\\\\"
-          )}"
            |  def cs                         = "${settings.cs().replace("\\", "\\\\")}"
            |  def workspaceDirName           = "$workspaceDirName"
            |  def libsodiumVersion           = "${deps.libsodiumVersion}"

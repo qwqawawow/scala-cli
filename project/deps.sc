@@ -133,7 +133,6 @@ object Deps {
     .exclude(("org.scala-lang.modules", "scala-collection-compat_2.13"))
     .exclude(("com.github.plokhotnyuk.jsoniter-scala", "jsoniter-scala-core_2.13"))
   def dependency   = ivy"io.get-coursier::dependency:0.2.3"
-  def dockerClient = ivy"com.spotify:docker-client:8.16.0"
   // TODO bump once 0.15.5 is out
   def expecty = ivy"com.eed3si9n.expecty::expecty:0.16.0"
   def fansi   = ivy"com.lihaoyi::fansi:0.5.0"
@@ -223,7 +222,6 @@ def graalVmVersion     = "22.3.1"
 def graalVmJavaVersion = 17
 def graalVmJvmId       = s"graalvm-java$graalVmJavaVersion:$graalVmVersion"
 
-def csDockerVersion = Deps.Versions.coursierCli
 
 def buildCsVersion   = Deps.Versions.coursierCli
 def buildCsM1Version = Deps.Versions.coursierM1Cli

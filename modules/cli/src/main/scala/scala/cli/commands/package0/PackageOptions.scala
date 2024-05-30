@@ -89,21 +89,6 @@ final case class PackageOptions(
   @Recurse
     packager: PackagerOptions = PackagerOptions(),
   @Group(HelpGroup.Package.toString)
-  @HelpMessage("Build Debian package, available only on Linux")
-  @Tag(tags.restricted)
-  @Tag(tags.inShortHelp)
-    deb: Boolean = false,
-  @Group(HelpGroup.Package.toString)
-  @HelpMessage("Build dmg package, available only on macOS")
-  @Tag(tags.restricted)
-  @Tag(tags.inShortHelp)
-    dmg: Boolean = false,
-  @Group(HelpGroup.Package.toString)
-  @HelpMessage("Build rpm package, available only on Linux")
-  @Tag(tags.restricted)
-  @Tag(tags.inShortHelp)
-    rpm: Boolean = false,
-  @Group(HelpGroup.Package.toString)
   @HelpMessage("Build msi package, available only on Windows")
   @Tag(tags.restricted)
   @Tag(tags.inShortHelp)
@@ -113,11 +98,7 @@ final case class PackageOptions(
   @Tag(tags.restricted)
   @Tag(tags.inShortHelp)
     pkg: Boolean = false,
-  @Group(HelpGroup.Package.toString)
-  @HelpMessage("Build Docker image")
-  @Tag(tags.restricted)
-  @Tag(tags.inShortHelp)
-    docker: Boolean = false,
+  
 
   @Group(HelpGroup.Package.toString)
   @Hidden
@@ -153,11 +134,6 @@ final case class PackageOptions(
         )
       )
       else if (spark) Some(PackageType.Spark)
-      else if (deb) Some(PackageType.Debian)
-      else if (dmg) Some(PackageType.Dmg)
-      else if (pkg) Some(PackageType.Pkg)
-      else if (rpm) Some(PackageType.Rpm)
-      else if (msi) Some(PackageType.Msi)
       else if (nativeImage) Some(PackageType.GraalVMNativeImage)
       else None
     }
@@ -189,18 +165,7 @@ final case class PackageOptions(
           packageTypeOpt = packageTypeOpt,
           logoPath = packager.logoPath.map(os.Path(_, os.pwd)),
           macOSidentifier = packager.identifier,
-          debianOptions = DebianOptions(
-            conflicts = packager.debianConflicts,
-            dependencies = packager.debianDependencies,
-            architecture = Some(packager.debArchitecture),
-            priority = packager.priority,
-            section = packager.section
-          ),
-          redHatOptions = RedHatOptions(
-            license = packager.license,
-            release = Some(packager.release),
-            architecture = Some(packager.rpmArchitecture)
-          ),
+          
           windowsOptions = WindowsOptions(
             licensePath = packager.licensePath.map(os.Path(_, os.pwd)),
             productName = Some(packager.productName),
@@ -211,14 +176,7 @@ final case class PackageOptions(
             installerVersion = packager.installerVersion,
             wixUpgradeCodeGuid = packager.wixUpgradeCodeGuid
           ),
-          dockerOptions = DockerOptions(
-            from = packager.dockerFrom,
-            imageRegistry = packager.dockerImageRegistry,
-            imageRepository = packager.dockerImageRepository,
-            imageTag = packager.dockerImageTag,
-            cmd = packager.dockerCmd,
-            isDockerEnabled = Some(docker)
-          ),
+         
           nativeImageOptions = NativeImageOptions(
             graalvmJvmId = packager.graalvmJvmId.map(_.trim).filter(_.nonEmpty),
             graalvmJavaVersion = packager.graalvmJavaVersion.filter(_ > 0),

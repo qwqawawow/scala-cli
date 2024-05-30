@@ -6,12 +6,6 @@ import caseapp.core.help.HelpFormat
 import coursier.launcher.*
 import dependency.*
 import packager.config.*
-import packager.deb.DebianPackage
-import packager.docker.DockerPackage
-import packager.mac.dmg.DmgPackage
-import packager.mac.pkg.PkgPackage
-import packager.rpm.RedHatPackage
-import packager.windows.WindowsPackage
 
 import java.io.{ByteArrayOutputStream, OutputStream}
 import java.nio.charset.StandardCharsets
@@ -208,11 +202,6 @@ object Package extends ScalaCommand[PackageOptions] with BuildCommandHelpers {
         case _: PackageType.Assembly => ".jar"
         case PackageType.Spark       => ".jar"
         case PackageType.Js          => ".js"
-        case PackageType.Debian      => ".deb"
-        case PackageType.Dmg         => ".dmg"
-        case PackageType.Pkg         => ".pkg"
-        case PackageType.Rpm         => ".rpm"
-        case PackageType.Msi         => ".msi"
 
         case PackageType.Native.Application =>
           if Properties.isWin then ".exe" else ""
@@ -222,7 +211,6 @@ object Package extends ScalaCommand[PackageOptions] with BuildCommandHelpers {
           if Properties.isWin then ".lib" else ".a"
 
         case PackageType.GraalVMNativeImage if Properties.isWin => ".exe"
-        case _ if Properties.isWin                              => ".bat"
         case _                                                  => ""
       }
 
@@ -233,11 +221,6 @@ object Package extends ScalaCommand[PackageOptions] with BuildCommandHelpers {
         case _: PackageType.Assembly => "app.jar"
         case PackageType.Spark       => "job.jar"
         case PackageType.Js          => "app.js"
-        case PackageType.Debian      => "app.deb"
-        case PackageType.Dmg         => "app.dmg"
-        case PackageType.Pkg         => "app.pkg"
-        case PackageType.Rpm         => "app.rpm"
-        case PackageType.Msi         => "app.msi"
 
         case PackageType.Native.Application =>
           if Properties.isWin then "app.exe" else "app"
@@ -251,7 +234,6 @@ object Package extends ScalaCommand[PackageOptions] with BuildCommandHelpers {
           if Properties.isWin then "library.lib" else "library.a"
 
         case PackageType.GraalVMNativeImage if Properties.isWin => "app.exe"
-        case _ if Properties.isWin                              => "app.bat"
         case _                                                  => "app"
       }
       val output = outputOpt.map {
@@ -414,95 +396,8 @@ object Package extends ScalaCommand[PackageOptions] with BuildCommandHelpers {
           )
           destPath
 
-        case nativePackagerType: PackageType.NativePackagerType =>
-          val bootstrapPath = os.temp.dir(prefix = "scala-packager") / "app"
-          value {
-            bootstrap(
-              build,
-              bootstrapPath,
-              value(mainClass),
-              () => alreadyExistsCheck(),
-              logger
-            )
-          }
-          val sharedSettings = SharedSettings(
-            sourceAppPath = bootstrapPath,
-            version = packageOptions.packageVersion,
-            force = force,
-            outputPath = destPath,
-            logoPath = packageOptions.logoPath,
-            launcherApp = packageOptions.launcherApp
-          )
+ 
 
-          lazy val debianSettings = DebianSettings(
-            shared = sharedSettings,
-            maintainer = packageOptions.maintainer.mandatory("--maintainer", "debian"),
-            description = packageOptions.description.mandatory("--description", "debian"),
-            debianConflicts = packageOptions.debianOptions.conflicts,
-            debianDependencies = packageOptions.debianOptions.dependencies,
-            architecture = packageOptions.debianOptions.architecture.mandatory(
-              "--deb-architecture",
-              "debian"
-            ),
-            priority = packageOptions.debianOptions.priority,
-            section = packageOptions.debianOptions.section
-          )
-
-          lazy val macOSSettings = MacOSSettings(
-            shared = sharedSettings,
-            identifier =
-              packageOptions.macOSidentifier.mandatory("--identifier-parameter", "macOs")
-          )
-
-          lazy val redHatSettings = RedHatSettings(
-            shared = sharedSettings,
-            description = packageOptions.description.mandatory("--description", "redHat"),
-            license =
-              packageOptions.redHatOptions.license.mandatory("--license", "redHat"),
-            release =
-              packageOptions.redHatOptions.release.mandatory("--release", "redHat"),
-            rpmArchitecture = packageOptions.redHatOptions.architecture.mandatory(
-              "--rpm-architecture",
-              "redHat"
-            )
-          )
-
-          lazy val windowsSettings = WindowsSettings(
-            shared = sharedSettings,
-            maintainer = packageOptions.maintainer.mandatory("--maintainer", "windows"),
-            licencePath = packageOptions.windowsOptions.licensePath.mandatory(
-              "--licence-path",
-              "windows"
-            ),
-            productName = packageOptions.windowsOptions.productName.mandatory(
-              "--product-name",
-              "windows"
-            ),
-            exitDialog = packageOptions.windowsOptions.exitDialog,
-            suppressValidation =
-              packageOptions.windowsOptions.suppressValidation.getOrElse(false),
-            extraConfigs = packageOptions.windowsOptions.extraConfig,
-            is64Bits = packageOptions.windowsOptions.is64Bits.getOrElse(true),
-            installerVersion = packageOptions.windowsOptions.installerVersion,
-            wixUpgradeCodeGuid = packageOptions.windowsOptions.wixUpgradeCodeGuid
-          )
-
-          nativePackagerType match {
-            case PackageType.Debian =>
-              DebianPackage(debianSettings).build()
-            case PackageType.Dmg =>
-              DmgPackage(macOSSettings).build()
-            case PackageType.Pkg =>
-              PkgPackage(macOSSettings).build()
-            case PackageType.Rpm =>
-              RedHatPackage(redHatSettings).build()
-            case PackageType.Msi =>
-              WindowsPackage(windowsSettings).build()
-          }
-          destPath
-        case PackageType.Docker =>
-          value(docker(build, value(mainClass), logger))
-          destPath
       }
 
       val printableOutput = CommandUtils.printablePath(outputPath)
@@ -617,76 +512,7 @@ object Package extends ScalaCommand[PackageOptions] with BuildCommandHelpers {
     baos.toByteArray
   }
 
-  private def docker(
-    build: Build.Successful,
-    mainClass: String,
-    logger: Logger
-  ): Either[BuildException, Unit] = either {
-    val packageOptions = build.options.notForBloopOptions.packageOptions
 
-    if (build.options.platform.value == Platform.Native && (Properties.isMac || Properties.isWin)) {
-      System.err.println(
-        "Package scala native application to docker image is not supported on MacOs and Windows"
-      )
-      sys.exit(1)
-    }
-
-    val exec = packageOptions.dockerOptions.cmd.orElse {
-      build.options.platform.value match {
-        case Platform.JVM    => Some("sh")
-        case Platform.JS     => Some("node")
-        case Platform.Native => None
-      }
-    }
-    val from = packageOptions.dockerOptions.from.getOrElse {
-      build.options.platform.value match {
-        case Platform.JVM    => "openjdk:17-slim"
-        case Platform.JS     => "node"
-        case Platform.Native => "debian:stable-slim"
-      }
-    }
-    val repository = packageOptions.dockerOptions.imageRepository.mandatory(
-      "--docker-image-repository",
-      "docker"
-    )
-    val tag = packageOptions.dockerOptions.imageTag.getOrElse("latest")
-
-    val dockerSettings = DockerSettings(
-      from = from,
-      registry = packageOptions.dockerOptions.imageRegistry,
-      repository = repository,
-      tag = Some(tag),
-      exec = exec,
-      dockerExecutable = None
-    )
-
-    val appPath = os.temp.dir(prefix = "scala-cli-docker") / "app"
-    build.options.platform.value match {
-      case Platform.JVM => value(bootstrap(build, appPath, mainClass, () => Right(()), logger))
-      case Platform.JS  => buildJs(build, appPath, Some(mainClass), logger)
-      case Platform.Native =>
-        val dest =
-          value(buildNative(
-            build = build,
-            mainClass = Some(mainClass),
-            targetType = PackageType.Native.Application,
-            destPath = None,
-            logger = logger
-          ))
-        os.copy(dest, appPath)
-    }
-
-    logger.message(
-      "Started building docker image with your application, it might take some time"
-    )
-
-    DockerPackage(appPath, dockerSettings).build()
-
-    logger.message(
-      "Built docker image, run it with" + System.lineSeparator() +
-        s"  docker run $repository:$tag"
-    )
-  }
 
   private def buildJs(
     build: Build.Successful,
@@ -1141,13 +967,6 @@ object Package extends ScalaCommand[PackageOptions] with BuildCommandHelpers {
 
     forcedPackageTypeOpt -> build.options.platform.value match {
       case (Some(forcedPackageType), _) => Right(forcedPackageType)
-      case (_, _) if build.options.notForBloopOptions.packageOptions.isDockerEnabled =>
-        basePackageTypeOpt match {
-          case Some(PackageType.Docker) | None => Right(PackageType.Docker)
-          case Some(packageType) => Left(new MalformedCliInputError(
-              s"Unsupported package type: $packageType for Docker."
-            ))
-        }
       case (_, Platform.JS) =>
         val validatedPackageType =
           for (basePackageType <- basePackageTypeOpt)

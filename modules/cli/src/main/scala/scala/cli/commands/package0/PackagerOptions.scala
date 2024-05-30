@@ -108,36 +108,6 @@ final case class PackagerOptions(
   @HelpMessage("The GUID to identify that the windows package can be upgraded.")
   @Tag(tags.restricted)
     wixUpgradeCodeGuid: Option[String] = None,
-  @Group(HelpGroup.Docker.toString)
-  @HelpMessage(
-    "Building the container from base image"
-  )
-  @Tag(tags.restricted)
-  dockerFrom: Option[String] = None,
-  @Group(HelpGroup.Docker.toString)
-  @HelpMessage(
-    "The image registry; if empty, it will use the default registry"
-  )
-  @Tag(tags.restricted)
-  dockerImageRegistry: Option[String] = None,
-  @Group(HelpGroup.Docker.toString)
-  @HelpMessage(
-    "The image repository"
-  )
-  @Tag(tags.restricted)
-  dockerImageRepository: Option[String] = None,
-  @Group(HelpGroup.Docker.toString)
-  @HelpMessage(
-    "The image tag; the default tag is `latest`"
-  )
-  @Tag(tags.restricted)
-  dockerImageTag: Option[String] = None,
-  @Group(HelpGroup.Docker.toString)
-  @HelpMessage(
-    "Allows to override the executable used to run the application in docker, otherwise it defaults to sh for the JVM platform and node for the JS platform"
-  )
-  @Tag(tags.restricted)
-  dockerCmd: Option[String] = None,
 
   @Group(HelpGroup.NativeImage.toString)
   @HelpMessage(s"GraalVM Java major version to use to build GraalVM native images (${Constants.defaultGraalVMJavaVersion} by default)")

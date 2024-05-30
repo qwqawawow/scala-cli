@@ -315,7 +315,7 @@ trait CliLaunchers extends SbtModule { self =>
               |export LANGUAGE=en_US:en
               |export LC_ALL=en_US.UTF-8""".stripMargin,
         csUrl =
-          s"https://github.com/coursier/coursier/releases/download/v${deps.csDockerVersion}/cs-x86_64-pc-linux.gz",
+          s"https://github.com/coursier/coursier/releases/download/v${Deps.Versions.coursierCli}/cs-x86_64-pc-linux.gz",
         extraNativeImageArgs = Nil
       )
     )
@@ -345,7 +345,7 @@ trait CliLaunchers extends SbtModule { self =>
     def nativeImageDockerParams = T {
       val baseDockerParams = NativeImage.linuxStaticParams(
         Docker.muslBuilder,
-        s"https://github.com/coursier/coursier/releases/download/v${deps.csDockerVersion}/cs-x86_64-pc-linux.gz"
+        s"https://github.com/coursier/coursier/releases/download/v${Deps.Versions.coursierCli}/cs-x86_64-pc-linux.gz"
       )
       val dockerParams = setupLocaleAndOptions(baseDockerParams)
       buildHelperImage()
@@ -367,7 +367,7 @@ trait CliLaunchers extends SbtModule { self =>
     def nativeImageDockerParams = T {
       val baseDockerParams = NativeImage.linuxMostlyStaticParams(
         "ubuntu:18.04", // TODO Pin that
-        s"https://github.com/coursier/coursier/releases/download/v${deps.csDockerVersion}/cs-x86_64-pc-linux.gz"
+        s"https://github.com/coursier/coursier/releases/download/v${Deps.Versions.coursierCli}/cs-x86_64-pc-linux.gz"
       )
       val dockerParams = setupLocaleAndOptions(baseDockerParams)
       Some(dockerParams)
